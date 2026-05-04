@@ -4,28 +4,32 @@ Quick Config & Install Scripts for Docker GPU Development Environment, powered b
 
 ## Overview
 
-This repository provides one-click setup scripts and guides for creating GPU-enabled Docker containers with:
+This repository provides one-click setup scripts and guides for:
 
-- **CUDA Toolkit 12.8**
-- **Python 3.11**
-- **PyTorch 2.9.1 (CUDA 12.8)**
-- **RDMA / InfiniBand support**
-- **Claude Code CLI**
+- **GPU Docker Container** — CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 + RDMA support
+- **LaTeX Docker Container** — Full TeX Live environment with SSH access
+- **Claude Code CLI** — Claude Code installation via Copilot API Proxy
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `new_docker_setup_guide.md` | Step-by-step guide for creating a Docker container with GPU & RDMA support |
-| `new_docker_env_setup.sh` | One-click script: installs CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 inside container |
-| `claude_code_docker_setup_guide.md` | Guide for installing Claude Code CLI in Docker |
-| `claude_code_docker_setup.sh` | One-click script: installs Node.js + Claude Code CLI |
+| **GPU Development Environment (Remote Server)** | |
+| `new_docker_setup_guide.md` | Guide for creating a Docker container with GPU & RDMA support |
+| `new_docker_env_setup.sh` | One-click script: CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 |
+| **LaTeX Environment (Local macOS)** | |
+| `docker_claude_latex_guide.md` | Guide for creating a LaTeX Docker container with SSH |
+| `docker_claude_latex.sh` | One-click script: TeX Live container with SSH public key auth |
+| **Claude Code CLI (Local & Remote)** | |
+| `docker_claude_setup_guide.md` | Guide for installing Claude Code CLI via Copilot API Proxy |
+| `docker_claude_setup.sh` | One-click script: Node.js + Claude Code CLI + Copilot API |
 
 ## Quick Start
 
-### 1. Create Docker Container
+### GPU Development Container (Remote Server)
 
 ```bash
+# 1. Create container with GPU & RDMA support
 docker run -it --user root \
   --ulimit memlock=-1:-1 \
   --ulimit nofile=65536:65536 \
@@ -43,26 +47,25 @@ docker run -it --user root \
   -p 2232:22 \
   --name <CONTAINER_NAME> \
   ubuntu
-```
 
-### 2. Install Environment (inside container)
-
-```bash
-# Install CUDA + Python + PyTorch
+# 2. Install CUDA + Python + PyTorch (inside container)
 bash /home/huangxin/code_list/claude-for-config/new_docker_env_setup.sh
 
-# Install Claude Code CLI
-bash /home/huangxin/code_list/claude-for-config/claude_code_docker_setup.sh
+# 3. Install Claude Code CLI (inside container)
+bash /home/huangxin/code_list/claude-for-config/docker_claude_setup.sh
 ```
 
-### 3. Verify
+### LaTeX Container (Local macOS)
 
 ```bash
-nvcc --version
-python --version
-python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
-claude --version
+# One-click: create or enter LaTeX container
+bash docker_claude_latex.sh
 ```
+
+The script will:
+- Pull `texlive/texlive:latest` image if not present (~5GB)
+- Create container with SSH and mount local directories
+- If container already exists, start and enter it directly
 
 ## License
 

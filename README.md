@@ -12,15 +12,24 @@ This repository provides one-click setup scripts and guides for:
 
 ## Files
 
+### GPU Development Environment (Remote Server)
+
 | File | Description |
 |------|-------------|
-| **GPU Development Environment (Remote Server)** | |
 | `new_docker_setup_guide.md` | Guide for creating a Docker container with GPU & RDMA support |
 | `new_docker_env_setup.sh` | One-click script: CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 |
-| **LaTeX Environment (Local macOS)** | |
+
+### LaTeX Environment (Local macOS)
+
+| File | Description |
+|------|-------------|
 | `docker_claude_latex_guide.md` | Guide for creating a LaTeX Docker container with SSH |
 | `docker_claude_latex.sh` | One-click script: TeX Live container with SSH public key auth |
-| **Claude Code CLI (Local & Remote)** | |
+
+### Claude Code CLI (Local & Remote)
+
+| File | Description |
+|------|-------------|
 | `docker_claude_setup_guide.md` | Guide for installing Claude Code CLI via Copilot API Proxy |
 | `docker_claude_setup.sh` | One-click script: Node.js + Claude Code CLI + Copilot API |
 

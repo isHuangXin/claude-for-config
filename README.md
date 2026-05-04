@@ -26,6 +26,8 @@ This repository provides one-click setup scripts and guides for:
 | `docker_claude_latex_guide.md` | Guide for creating a LaTeX Docker container with SSH |
 | `docker_claude_latex.sh` | One-click script: TeX Live container with SSH public key auth |
 
+> **VSCode Plugin**: Install [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) for syntax highlighting, auto-compilation, and PDF preview.
+
 ### Claude Code CLI (Local & Remote)
 
 | File | Description |

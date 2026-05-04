@@ -19,6 +19,15 @@ This repository provides one-click setup scripts and guides for:
 | `new_docker_setup_guide.md` | Guide for creating a Docker container with GPU & RDMA support |
 | `new_docker_env_setup.sh` | One-click script: CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 |
 
+> **LaTeX on Remote Server**: If you need LaTeX in the GPU container without pulling a new image, install TeX Live directly:
+> ```bash
+> # Full installation (~5GB, includes all packages)
+> apt-get update && apt-get install -y texlive-full
+>
+> # Or minimal installation (~500MB, faster)
+> apt-get install -y texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
+> ```
+
 ### LaTeX Environment (Local macOS)
 
 | File | Description |
@@ -34,6 +43,36 @@ This repository provides one-click setup scripts and guides for:
 |------|-------------|
 | `docker_claude_setup_guide.md` | Guide for installing Claude Code CLI via Copilot API Proxy |
 | `docker_claude_setup.sh` | One-click script: Node.js + Claude Code CLI + Copilot API |
+
+### APT Mirror (Remote Server)
+
+| File | Description |
+|------|-------------|
+| `change_apt_source.sh` | Switch APT source between Ubuntu official and Aliyun mirror |
+
+> **Usage**: Default APT source is `http://archive.ubuntu.com` (slow in China). Switch to Aliyun mirror for faster downloads:
+
+**Method 1: Manual**
+
+```bash
+# Switch to Aliyun mirror
+sed -i 's|http://archive.ubuntu.com|https://mirrors.aliyun.com|g' /etc/apt/sources.list.d/ubuntu.sources
+apt-get update
+
+# Restore to Ubuntu official source
+sed -i 's|https://mirrors.aliyun.com|http://archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources
+apt-get update
+```
+
+**Method 2: Script**
+
+```bash
+# Switch to Aliyun mirror
+bash change_apt_source.sh
+
+# Restore to Ubuntu official source
+bash change_apt_source.sh --restore
+```
 
 ## Quick Start
 

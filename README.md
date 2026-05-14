@@ -9,6 +9,7 @@ This repository provides one-click setup scripts and guides for:
 - **GPU Docker Container** — CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 + RDMA support
 - **LaTeX Docker Container** — Full TeX Live environment with SSH access
 - **Claude Code CLI** — Claude Code installation via Copilot API Proxy
+- **GPG Signing** — GPG key generation & Git commit signature verification
 
 ## Files
 
@@ -43,6 +44,23 @@ This repository provides one-click setup scripts and guides for:
 |------|-------------|
 | `docker_claude_setup_guide.md` | Guide for installing Claude Code CLI via Copilot API Proxy |
 | `docker_claude_setup.sh` | One-click script: Node.js + Claude Code CLI + Copilot API |
+
+### GPG Signing (Local & Remote)
+
+| File | Description |
+|------|-------------|
+| `gpg_setup_guide.md` | Guide for GPG key generation & Git commit signature verification |
+| `gpg_setup.sh` | One-click script: GPG key generation + Git signing config + public key export |
+
+> **Usage**:
+> ```bash
+> # Default config (isHuangXin / huangxin.hust@gmail.com)
+> bash gpg_setup.sh
+>
+> # Custom name and email
+> bash gpg_setup.sh "YourName" "your@email.com"
+> ```
+> After running, copy the output public key and add it to [GitHub GPG Keys](https://github.com/settings/gpg/new).
 
 ### APT Mirror (Remote Server)
 

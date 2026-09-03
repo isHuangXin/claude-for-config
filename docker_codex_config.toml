@@ -1,0 +1,22 @@
+model = "gpt-5.6-sol"
+model_provider = "copilot"
+model_reasoning_effort = "high"
+service_tier = "ultrafast"
+
+[model_providers.copilot]
+name = "Copilot API"
+base_url = "http://localhost:4141"
+env_key = "COPILOT_API_KEY"
+wire_api = "responses"
+
+[projects."/home/v-huanxin/.codex"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/v-huanxin"]
+trust_level = "trusted"
+
+[projects."/home/v-huanxin"]
+trust_level = "trusted"
+
+[projects."/home/v-huanxin/code_list/L3Cache-Infer"]
+trust_level = "trusted"

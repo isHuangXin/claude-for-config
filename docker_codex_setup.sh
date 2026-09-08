@@ -29,16 +29,18 @@ echo "=== [4/4] 创建 Codex 配置 ==="
 mkdir -p ~/.codex
 
 cat > ~/.codex/config.toml <<'EOF'
-model = "gpt-5.6-sol"
+model = "gpt-6-astra"
 model_provider = "copilot"
-model_reasoning_effort = "high"
+model_reasoning_effort = "max"
 service_tier = "ultrafast"
 
 [model_providers.copilot]
 name = "Copilot API"
 base_url = "http://127.0.0.1:4141"
 env_key = "COPILOT_API_KEY"
-wire_api[model_providers.copilot "Copilot USER"]
+wire_api = "responses"
+
+[projects."/root"]
 trust_level = "trusted"
 EOF
 

@@ -2,9 +2,13 @@
 set -euo pipefail
 
 if [ "$EUID" -eq 0 ]; then
-    echo "请以普通用户运行此脚本，不要使用 sudo bash 或 root 账户。" >&2
+    echo "请直接以普通用户运行此脚本，不要使用 root 账户。" >&2
     exit 1
 fi
+
+install_prefix="$HOME/.local"
+mkdir -p "$install_prefix/bin"
+export PATH="$install_prefix/bin:$PATH"
 
 node_is_supported() {
     command -v node >/dev/null 2>&1 && node -e '
@@ -14,23 +18,95 @@ node_is_supported() {
     '
 }
 
-echo "=== [1/5] 检查 Node.js 和 npm ==="
+echo "=== [1/5] 检查 Node.js 和 npm（无需 sudo 或密码） ==="
 if ! node_is_supported || ! command -v npm >/dev/null 2>&1; then
-    if ! command -v sudo >/dev/null 2>&1 || ! command -v apt-get >/dev/null 2>&1; then
-        echo "需要 Node.js >= 20.18.1 和 npm；自动安装仅支持具有 sudo 权限的 Debian/Ubuntu 用户。" >&2
+    if [ "$(uname -s)" != "Linux" ]; then
+        echo "自动安装仅支持 Linux；请先在用户目录安装 Node.js >= 20.18.1 和 npm。" >&2
+        exit 1
+    fi
+    case "$(uname -m)" in
+        x86_64) node_arch="x64" ;;
+        aarch64|arm64) node_arch="arm64" ;;
+        *) echo "当前 CPU 架构不支持自动安装 Node.js，请手动安装兼容版本。" >&2; exit 1 ;;
+    esac
+
+    if command -v curl >/dev/null 2>&1; then
+        download=(curl -fsSL --proto '=https' --proto-redir '=https' -o)
+    elif command -v wget >/dev/null 2>&1; then
+        download=(wget --https-only -q -O)
+    else
+        echo "缺少下载工具：需要 curl 或 wget，请联系管理员提供。" >&2
+        exit 1
+    fi
+    for cmd in tar gzip sha256sum; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            echo "缺少解压或校验工具：$cmd，请联系管理员提供。" >&2
+            exit 1
+        fi
+    done
+    for executable in node npm npx; do
+        target="$install_prefix/bin/$executable"
+        if [ -e "$target" ] && [ ! -L "$target" ]; then
+            echo "$target 已存在且不是符号链接，为避免覆盖已停止；请先手动处理该文件。" >&2
+            exit 1
+        fi
+    done
+
+    echo "将从 Node.js 官网下载 Node.js 22，安装到 $install_prefix，不修改系统软件。"
+    node_root="$install_prefix/lib/nodejs"
+    mkdir -p "$node_root"
+    download_dir="$(mktemp -d "$node_root/.download.XXXXXX")"
+    trap 'rm -rf -- "$download_dir"' EXIT
+
+    if ! "${download[@]}" "$download_dir/SHASUMS256.txt" "https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt"; then
+        echo "无法下载 Node.js 校验清单，请检查网络连接。" >&2
+        exit 1
+    fi
+    archive=""
+    archive_pattern="^node-v22\.[0-9]+\.[0-9]+-linux-${node_arch}\.tar\.gz$"
+    while read -r checksum filename; do
+        if [[ "$filename" =~ $archive_pattern && "$checksum" =~ ^[0-9a-f]{64}$ ]]; then
+            archive="$filename"
+            expected_checksum="$checksum"
+            break
+        fi
+    done < "$download_dir/SHASUMS256.txt"
+    if [ -z "$archive" ]; then
+        echo "官方校验清单中未找到当前架构的 Node.js 22 安装包。" >&2
         exit 1
     fi
 
-    echo "将使用 sudo 在系统中安装 Node.js 22，可能需要输入当前用户的密码。"
-    sudo -v
-    sudo apt-get update
-    sudo apt-get install -y curl ca-certificates
-    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
-    sudo apt-get install -y nodejs
+    node_dir="$node_root/${archive%.tar.gz}"
+    if [ ! -e "$node_dir" ]; then
+        node_version="${archive%-linux-*}"
+        node_version="${node_version#node-}"
+        if ! "${download[@]}" "$download_dir/$archive" "https://nodejs.org/dist/$node_version/$archive"; then
+            echo "无法下载 Node.js 安装包，请检查网络连接。" >&2
+            exit 1
+        fi
+        if ! printf '%s  %s\n' "$expected_checksum" "$download_dir/$archive" | sha256sum --check --status; then
+            echo "Node.js 安装包 SHA-256 校验失败，已停止安装。" >&2
+            exit 1
+        fi
+        tar -xzf "$download_dir/$archive" -C "$download_dir"
+        candidate_dir="$download_dir/${archive%.tar.gz}"
+    else
+        candidate_dir="$node_dir"
+    fi
+    if ! "$candidate_dir/bin/node" --version || ! PATH="$candidate_dir/bin:$PATH" "$candidate_dir/bin/npm" --version; then
+        echo "Node.js/npm 无法在当前系统运行，请检查系统库兼容性或已有安装目录。" >&2
+        exit 1
+    fi
+    if [ "$candidate_dir" != "$node_dir" ]; then
+        mv "$candidate_dir" "$node_dir"
+    fi
+    for executable in node npm npx; do
+        ln -sfn "$node_dir/bin/$executable" "$install_prefix/bin/$executable"
+    done
     hash -r
 
-    if ! node_is_supported || ! command -v npm >/dev/null 2>&1; then
-        echo "当前 PATH 中的 Node.js/npm 仍不满足要求，请检查是否被旧版本或版本管理器覆盖。" >&2
+    if ! node_is_supported || ! npm --version >/dev/null 2>&1; then
+        echo "用户目录中的 Node.js/npm 仍不满足要求，请检查安装文件和系统兼容性。" >&2
         exit 1
     fi
 fi
@@ -40,9 +116,6 @@ echo "npm version: $(npm -v)"
 
 echo ""
 echo "=== [2/5] 将 Claude Code 和 Copilot API 安装到当前用户目录 ==="
-install_prefix="$HOME/.local"
-mkdir -p "$install_prefix/bin"
-export PATH="$install_prefix/bin:$PATH"
 npm install -g --prefix "$install_prefix" @jeffreycao/copilot-api@latest --force
 npm install -g --prefix "$install_prefix" @anthropic-ai/claude-code
 

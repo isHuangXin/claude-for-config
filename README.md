@@ -9,6 +9,7 @@ This repository provides one-click setup scripts and guides for:
 - **GPU Docker Container** — CUDA 12.8 + Python 3.11 + PyTorch 2.9.1 + RDMA support
 - **LaTeX Docker Container** — Full TeX Live environment with SSH access
 - **Claude Code CLI** — Claude Code installation via Copilot API Proxy
+- **Claude Code Statusline** — claude-hud HUD config for model, context, usage and git status
 - **GPG Signing** — GPG key generation & Git commit signature verification
 
 ## Files
@@ -44,6 +45,31 @@ This repository provides one-click setup scripts and guides for:
 |------|-------------|
 | `docker_claude_setup_guide.md` | Guide for installing Claude Code CLI via Copilot API Proxy |
 | `docker_claude_setup.sh` | One-click script: Node.js + Claude Code CLI + Copilot API |
+
+### Claude Code Statusline (Local & Remote)
+
+| File | Description |
+|------|-------------|
+| `claude_hub_setting.json` | [claude-hud](https://github.com/jarrodwatts/claude-hud) statusline config: two-line HUD below the input field |
+
+> **Install**:
+> ```bash
+> claude plugin marketplace add jarrodwatts/claude-hud
+> claude plugin install claude-hud@claude-hud
+> ```
+> Then run `/claude-hud:setup` in a session. It copies a launcher to
+> `~/.claude/plugins/claude-hud/statusline.mjs`, backs up `settings.json`, and
+> writes the `statusLine` entry. Needs Node.js or Bun on `PATH`.
+>
+> **Apply this config**:
+> ```bash
+> cp claude_hub_setting.json ~/.claude/plugins/claude-hud/config.json
+> ```
+> Shows model, project, session name, advisor, cost and speed on the first line;
+> context bar, usage, RAM, tools, agents, todos, session tokens and git status on
+> the second. Hides the token breakdown, Claude Code version and session duration.
+> Unknown keys are dropped silently, so a config written for another version still
+> loads.
 
 ### GPG Signing (Local & Remote)
 
